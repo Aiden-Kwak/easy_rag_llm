@@ -2,7 +2,6 @@ import faiss
 import numpy as np
 import os
 from easy_rag.agent import Agent
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,18 +13,35 @@ def test_agent():
     index.add(data)
 
     agent = Agent(
-        model="openai",
+        model="deepseek-chat",
         open_api_key=os.getenv("OPENAI_API_KEY"),
+        deepseek_api_key=os.getenv("DEEPSEEK_API_KEY"),
+        deepseek_base_url="https://api.deepseek.com",
     )
 
     mock_resource = (index, [{"text": "Sample text", "file_name": "test.pdf", "page_number": i+1} for i in range(10)])
-    query_embedding=data[0]
     query = "What is the content of test.pdf?"
 
-    agent.default_query_embedding_fn = lambda query: query_embedding
+    # Generate prompt
+    agent.generate_response(mock_resource, query, return_prompt=True)
 
-    response = agent.generate_response(mock_resource, query)
+    # Output the generated prompt
+    print("\nGenerated Prompt:\n", agent.last_prompt)
 
-    # 검증
-    assert isinstance(response, str), "Response should be a string."
-    assert "Sample text" in response, "Response should contain relevant information."
+    # Assertions for the prompt
+    assert "System:" in agent.last_prompt, "Prompt should contain system instructions."
+    assert "Knowledge: start" in agent.last_prompt, "Prompt should include the Knowledge section."
+    assert query in agent.last_prompt, "Prompt should include the user query."
+    print("Prompt test passed.")
+
+    try:
+        # Generate and validate the response
+        response = agent.generate_response(mock_resource, query)
+        print("\nGenerated Response:\n", response)
+        assert isinstance(response, str), "Response should be a string."
+    except Exception as e:
+        print("Test failed:", e)
+        assert False, "Test failed."
+
+if __name__ == "__main__":
+    test_agent()

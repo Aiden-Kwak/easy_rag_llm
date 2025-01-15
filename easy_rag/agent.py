@@ -1,5 +1,6 @@
 import requests
 import numpy as np
+from openai import OpenAI
 
 class Agent:
     def __init__(self, model, open_api_key=None, deepseek_api_key=None, deepseek_base_url=None):
@@ -7,15 +8,14 @@ class Agent:
         self.open_api_key = open_api_key
         self.deepseek_api_key = deepseek_api_key
         self.deepseek_base_url = deepseek_base_url
-        
-        #self.default_query_embedding_fn=self.default_query_embedding_fn
+        self.last_prompt = None
 
-    def default_query_embedding_fn(self, query): # Agent 단일 테스트용 임시 임베딩.
-        return np.random.random(self.index.d).astype(np.float32) 
+    def default_query_embedding_fn(self, query, index_dim):
+        return np.random.random(index_dim).astype(np.float32)
 
-    def generate_response(self, resource, query):
+    def generate_response(self, resource, query, return_prompt=False):
         index, metadata = resource
-        query_embedding = self.default_query_embedding_fn(query)
+        query_embedding = self.default_query_embedding_fn(query, index.d)
         distances, indices = index.search(query_embedding.reshape(1, -1), 5)
 
         if indices.size == 0 or len(indices[0]) == 0:
@@ -28,33 +28,38 @@ class Agent:
         formatted_evidence = "\n".join(
             [f"File: {e['file_name']}, Page: {e['page_number']}, Text: {e['text']}" for e in evidence]
         )
-        response = f"Top evidence for query '{query}':\n{formatted_evidence}"
+        prompt = f"""
+        System: The following is the most relevant information from the Knowledge for your query. Always answer in the same language as the User prompt and strictly based on the provided Knowledge. Do not speculate or create information beyond what is given.
+        ==== Knowledge: start ====
+        {formatted_evidence}
+        ==== Knowledge: end ====
+
+        User: Below is the User prompt:
+        ==== User prompt: start ====
+        {query}
+        ==== User prompt: end ====
+        """
+        self.last_prompt = prompt.strip()
+        if return_prompt:
+            print(prompt)
+            return self.last_prompt
 
         if self.deepseek_api_key:
-            prompt = query
             headers = {
                 "Authorization": f"Bearer {self.deepseek_api_key}",
                 "Content-Type": "application/json",
             }
             try:
-                api_response = requests.post(
-                    url=f"{self.deepseek_base_url}/chat/completions",
-                    headers=headers,
-                    json={
-                        "model": self.model,
-                        "messages": [{"role": "system", "content": prompt}],
-                    }
+                client = OpenAI(api_key=self.deepseek_api_key, base_url=self.deepseek_base_url)
+                response = client.chat.completions.create(
+                    model=self.model,
+                    messages=[{"role": "system", "content": self.last_prompt}],
+                    stream=False
                 )
-                api_response.raise_for_status()
-                data = api_response.json()
-                if "choices" not in data or not data["choices"]:
-                    raise ValueError("Invalid response format from DeepSeek API")
-                return data["choices"][0]["message"]["content"]
-            except requests.exceptions.RequestException as e:
+                return response.choices[0].message.content
+            except Exception as e:
                 print(f"Error while calling DeepSeek API: {e}")
-                raise RuntimeError(f"Error while calling DeepSeek API: {e}")
-            except ValueError as e:
-                print(f"Error while processing DeepSeek API response: {e}")
-                raise RuntimeError(f"Error while processing DeepSeek API response: {e}")
+                raise RuntimeError("DeepSeek API call failed.") from e
 
-        return response
+        return "DeepSeek API key not provided. Returning prompt only."
+

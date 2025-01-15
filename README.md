@@ -1,7 +1,7 @@
 # easy_rag_llm
 
 ## CAUTION
-- easy-rag-llm==1.0.* version is testing version. These version is usually invalid.
+- easy-rag-llm==1.0.* version is testing version. These versions are usually invalid.
 
 ## 🇰🇷 소개
 - easy_rag_llm는 OpenAI 및 DeepSeek 모델을 지원하는 간단한 RAG(정보 검색 및 생성) 기반 서비스를 제공합니다. 간단하게 RAG LLM을 서비스에 통합시킬 수 있도록 만들어졌습니다.
