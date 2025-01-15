@@ -46,3 +46,6 @@ metadata.json
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# PyPI configuration
+.pypirc
