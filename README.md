@@ -31,3 +31,7 @@ response = rs.agent(resource, query)
 
 print(response)
 ```
+
+### MEMO.
+pdf 제목을 강제하자. info.json 을 추가하는 방식 대신 pdf의 제목을 추출하는 방식으로.
+worker 개수 사용자 단에서 조정할 필요성. 아니면 그냥 CPU 개수로 조절하는 방식 생각.
