@@ -58,10 +58,46 @@ print(response)
 - 1.1.0 : LTS version.
 
 ### TODO
-- Chaining 지원
-- pre_evidence=True 지원
-- 입력포맷 다양화. pdf외 지원.
-- L2 기반 벡터검색외 HNSW 지원. (체감성능 비교)
+- Chaining 지원 (v1.2.0 ~)
+- pre_evidence=True 지원 (v1.1.* ~)
+- 입력포맷 다양화. pdf외 지원. (v1.2.* ~)
+- L2 기반 벡터검색외 HNSW 지원. (체감성능 비교) (v1.3.0~)
+
+- chaining 인터페이스 구상 (Not supported yet. v1.2.0 will support.)
+```python
+from easy_rag import RagService, RagAgent, RagChain
+
+# 에이전트 1: 특정 데이터셋에서 검색
+search_agent = RagAgent(
+    agent_name="Search Agent",
+    prompt_template="Search for relevant information on: {input_data}",
+    model=rs,
+)
+
+# 에이전트 2: 요약 작업
+summary_agent = RagAgent(
+    agent_name="Summary Agent",
+    prompt_template="Summarize the following content: {input_data}",
+    model=rs2,
+)
+
+# 에이전트 3: 결과 분석
+analysis_agent = RagAgent(
+    agent_name="Analysis Agent",
+    prompt_template="Analyze and provide insights on: {input_data}",
+    model=rs2,
+)
+
+chain = RagChain(agents=[search_agent, summary_agent, analysis_agent])
+
+query = "Explain the key outcomes of the climate change report."
+response = chain.run(query)
+
+print(response)
+
+```
+
+
 
 ### Author Information
 - 곽병혁 (https://github.com/Aiden-Kwak)
