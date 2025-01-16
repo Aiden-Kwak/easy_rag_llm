@@ -21,9 +21,9 @@ class Agent:
         embedding = response.data[0].embedding
         return np.array(embedding, dtype=np.float32)
 
-    def generate_response(self, resource, query, return_prompt=False):
+    def generate_response(self, resource, query, return_prompt=False, evidence_num=3):
         index, metadata = resource
-        TOP_K = 3
+        TOP_K = evidence_num
         query_embedding = self.real_query_embedding_fn(query, index.d)
         distances, indices = index.search(query_embedding.reshape(1, -1), TOP_K)
         
