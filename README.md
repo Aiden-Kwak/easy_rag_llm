@@ -30,7 +30,7 @@ rs = RagService(
     deepseek_base_url="https://api.deepseek.com",
 )
 
-resource = rs.rsc("./rscFiles")  # Learn from all files under ./rscFiles
+resource = rs.rsc("./rscFiles", force_update=False)  # Learn from all files under ./rscFiles
 
 query = "Explain what is taught in the third week's lecture."
 response, top_evidence = rs.generate_response(resource, query)
@@ -39,16 +39,17 @@ print(response)
 ```
 
 ### 🇰🇷 메모.
-pdf 제목을 명확하게 적어주세요. 메타데이터에는 pdf제목이 추출되어 들어가며, 답변 근거를 출력할때 유용하게 사용될 수 있습니다.  
+- pdf 제목을 명확하게 적어주세요. 메타데이터에는 pdf제목이 추출되어 들어가며, 답변 근거를 출력할때 유용하게 사용될 수 있습니다.
+- `rs.rsc("./folder")` 작동시 `faiss_index.bin`과 `metadata.json`이 생성됩니다. 이후엔 이미 만들어진 .bin과 .json으로 답변을 생성합니다. 만약 폴더에 새로운 파일을 추가하거나 제거하여 변경하고 싶다면 `force_update=True`로 설정하여 강제업데이트가 가능합니다.
 
 ### 🇺🇸 Memo.
 - Ensure that your PDFs have clear titles. Extracted titles from the PDF metadata are used during training and for generating evidence-based responses.
+- Running `rs.rsc("./folder")` generates `faiss_index.bin` and `metadata.json` files. Subsequently, the system uses the existing .bin and .json files to generate responses. If you want to reflect changes by adding or removing files in the folder, you can enable forced updates by setting `force_update=True`.
 
 ### release version.
 - 1.0.12 : Supported. However, the embedding model and chat model are fixed to OpenAI's text-embedding-3-small and deepseek-chat, respectively. Fixed at threadpool worker=10, which may cause errors in certain environments.
 
 ### 고쳐야할 지점
-- rscfolder 업데이트되어도 faissindex와 metadata는 업데이트되지 않는 상태.(~ v1.0.12 기준)
 - worker 개수 자율조정을 위한 파라미터 추가 필요
 - 참고할 evidence 개수 조정 파라미터 추가 필요
 - api key 사용이 자유롭지 않음.
