@@ -5,7 +5,7 @@
 
 ## 🇰🇷 소개
 - easy_rag_llm는 OpenAI 및 DeepSeek 모델을 지원하는 간단한 RAG(정보 검색 및 생성) 기반 서비스를 제공합니다. 간단하게 RAG LLM을 서비스에 통합시킬 수 있도록 만들어졌습니다.
-- (2025.01.15 기준/ v1.0.0) 학습가능한 자료 포맷은 PDF입니다.
+- (2025.01.16 기준/ v1.0.12) 학습가능한 자료 포맷은 PDF입니다.
 
 ## 🇺🇸 Introduction
 - easy_rag_llm is a lightweight RAG-based service that supports both OpenAI and DeepSeek models.
@@ -32,7 +32,7 @@ rs = RagService(
 
 resource = rs.rsc("./rscFiles")  # Learn from all files under ./rscFiles
 
-query = "What is the summary of the first document?"
+query = "Explain what is taught in the third week's lecture."
 response, top_evidence = rs.generate_response(resource, query)
 
 print(response)
@@ -46,6 +46,12 @@ pdf 제목을 명확하게 적어주세요. 메타데이터에는 pdf제목이 �
 
 ### release version.
 - 1.0.12 : Supported. However, the embedding model and chat model are fixed to OpenAI's text-embedding-3-small and deepseek-chat, respectively. Fixed at threadpool worker=10, which may cause errors in certain environments.
+
+### 고쳐야할 지점
+- rscfolder 업데이트되어도 faissindex와 metadata는 업데이트되지 않는 상태.(~ v1.0.12 기준)
+- worker 개수 자율조정을 위한 파라미터 추가 필요
+- 참고할 evidence 개수 조정 파라미터 추가 필요
+- api key 사용이 자유롭지 않음.
 
 ### Author Information
 - 곽병혁 (https://github.com/Aiden-Kwak)
