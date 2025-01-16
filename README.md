@@ -58,6 +58,8 @@ print(response)
 - 1.1.0 : LTS version.
 
 ### TODO
+- Chaining 지원
+- pre_evidence=True 지원
 - 입력포맷 다양화. pdf외 지원.
 - L2 기반 벡터검색외 HNSW 지원. (체감성능 비교)
 
