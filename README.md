@@ -10,7 +10,7 @@
 ## 🇺🇸 Introduction
 - easy_rag_llm is a lightweight RAG-based service that supports both OpenAI and DeepSeek models.
 It is designed to seamlessly integrate RAG-based LLM functionalities into your service.
-- As of 2025-01-15 (v1.0.0), the supported resource format for training is PDF.
+- As of 2025-01-15 (v1.1.0), the supported resource format for training is PDF.
 
 ## Usage
 #### Install (https://pypi.org/project/easy-rag-llm/)
@@ -59,6 +59,7 @@ print(response)
 
 ### TODO
 - 입력포맷 다양화. pdf외 지원.
+- L2 기반 벡터검색외 HNSW 지원. (체감성능 비교)
 
 ### Author Information
 - 곽병혁 (https://github.com/Aiden-Kwak)
