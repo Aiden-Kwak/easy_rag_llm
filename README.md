@@ -44,5 +44,8 @@ pdf 제목을 명확하게 적어주세요. 메타데이터에는 pdf제목이 �
 ### 🇺🇸 Memo.
 - Ensure that your PDFs have clear titles. Extracted titles from the PDF metadata are used during training and for generating evidence-based responses.
 
+### release version.
+- 1.0.12 : Supported. However, the embedding model and chat model are fixed to OpenAI's text-embedding-3-small and deepseek-chat, respectively. Fixed at threadpool worker=10, which may cause errors in certain environments.
+
 ### Author Information
 - 곽병혁 (https://github.com/Aiden-Kwak)

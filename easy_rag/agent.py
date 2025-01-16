@@ -2,6 +2,7 @@ import requests
 import numpy as np
 from openai import OpenAI
 import json
+import openai
 
 class Agent:
     def __init__(self, model, open_api_key=None, deepseek_api_key=None, deepseek_base_url=None):
@@ -11,14 +12,21 @@ class Agent:
         self.deepseek_base_url = deepseek_base_url
         self.last_prompt = None
 
-    def default_query_embedding_fn(self, query, index_dim):
+    def default_query_embedding_fn(self, query, index_dim): # 테스트용 가짜 임베딩
         return np.random.random(index_dim).astype(np.float32)
+    
+    def real_query_embedding_fn(self, query, index_dim_f): # 실제 임베딩, dim_f 안씀   
+        client = OpenAI(api_key=self.open_api_key)
+        response = client.embeddings.create(model="text-embedding-3-small", input=query)
+        embedding = response.data[0].embedding
+        return np.array(embedding, dtype=np.float32)
 
     def generate_response(self, resource, query, return_prompt=False):
         index, metadata = resource
-        query_embedding = self.default_query_embedding_fn(query, index.d)
-        distances, indices = index.search(query_embedding.reshape(1, -1), 3)
         TOP_K = 3
+        query_embedding = self.real_query_embedding_fn(query, index.d)
+        distances, indices = index.search(query_embedding.reshape(1, -1), TOP_K)
+        
 
         if indices.size == 0 or len(indices[0]) == 0:
             raise ValueError("No relevant evidence found.")
