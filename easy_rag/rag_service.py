@@ -55,5 +55,5 @@ class RagService:
 
     
     def generate_response(self, resource, query):
-        ### 입력쿼리에 대해 응답생성해야해
-        return self.agent.generate_response(resource, query)
+        response, top_evidence =  self.agent.generate_response(resource, query)
+        return response, top_evidence

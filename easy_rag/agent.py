@@ -1,6 +1,7 @@
 import requests
 import numpy as np
 from openai import OpenAI
+import json
 
 class Agent:
     def __init__(self, model, open_api_key=None, deepseek_api_key=None, deepseek_base_url=None):
@@ -16,7 +17,8 @@ class Agent:
     def generate_response(self, resource, query, return_prompt=False):
         index, metadata = resource
         query_embedding = self.default_query_embedding_fn(query, index.d)
-        distances, indices = index.search(query_embedding.reshape(1, -1), 5)
+        distances, indices = index.search(query_embedding.reshape(1, -1), 3)
+        TOP_K = 3
 
         if indices.size == 0 or len(indices[0]) == 0:
             raise ValueError("No relevant evidence found.")
@@ -25,11 +27,28 @@ class Agent:
         if not evidence:
             raise ValueError("No valid evidence found.")
 
+        """ legacy code
         formatted_evidence = "\n".join(
-            [f"File: {e['file_name']}, Page: {e['page_number']}, Text: {e['text']}" for e in evidence]
+            [f"File: {e['file_name']}, Page: {e['page_number']}, Text: {e['text']}" for e in evidence[:TOP_K]]
         )
+        """
+        # capsulate with JSON
+        formatted_evidence = json.dumps(
+            [{"file_name": e['file_name'], "page_number": e['page_number'], "text": e['text']} for e in evidence[:TOP_K]],
+            indent=4, ensure_ascii=False
+        )
+
+
         prompt = f"""
-        System: The following is the most relevant information from the Knowledge for your query. Always answer in the same language as the User prompt and strictly based on the provided Knowledge. Do not speculate or create information beyond what is given.
+        System: The following is the most relevant information from the Knowledge for your query.
+        Given format of the Knowledge is JSON with the following structure:
+        {{
+            "file_name": "string",
+            "page_number": "integer",
+            "text": "string"
+        }}
+        Always answer in the same language as the User prompt and strictly based on the provided Knowledge.
+        Do not speculate or create information beyond what is given.
         ==== Knowledge: start ====
         {formatted_evidence}
         ==== Knowledge: end ====
@@ -56,7 +75,7 @@ class Agent:
                     messages=[{"role": "system", "content": self.last_prompt}],
                     stream=False
                 )
-                return response.choices[0].message.content
+                return response.choices[0].message.content, formatted_evidence
             except Exception as e:
                 print(f"Error while calling DeepSeek API: {e}")
                 raise RuntimeError("DeepSeek API call failed.") from e

@@ -33,7 +33,7 @@ rs = RagService(
 resource = rs.rsc("./rscFiles")  # Learn from all files under ./rscFiles
 
 query = "What is the summary of the first document?"
-response = rs.generate_response(resource, query)
+response, top_evidence = rs.generate_response(resource, query)
 
 print(response)
 ```
