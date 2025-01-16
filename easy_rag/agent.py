@@ -5,8 +5,9 @@ import json
 import openai
 
 class Agent:
-    def __init__(self, model, open_api_key=None, deepseek_api_key=None, deepseek_base_url=None):
+    def __init__(self, embedding_model, model, open_api_key=None, deepseek_api_key=None, deepseek_base_url=None):
         self.model = model
+        self.embedding_model = embedding_model
         self.open_api_key = open_api_key
         self.deepseek_api_key = deepseek_api_key
         self.deepseek_base_url = deepseek_base_url
@@ -17,7 +18,7 @@ class Agent:
     
     def real_query_embedding_fn(self, query, index_dim_f): # 실제 임베딩, dim_f 안씀   
         client = OpenAI(api_key=self.open_api_key)
-        response = client.embeddings.create(model="text-embedding-3-small", input=query)
+        response = client.embeddings.create(model=self.embedding_model, input=query)
         embedding = response.data[0].embedding
         return np.array(embedding, dtype=np.float32)
 
@@ -71,7 +72,7 @@ class Agent:
             print(prompt)
             return self.last_prompt
 
-        if self.deepseek_api_key:
+        if self.model == "deepseek-chat":
             headers = {
                 "Authorization": f"Bearer {self.deepseek_api_key}",
                 "Content-Type": "application/json",
@@ -87,6 +88,23 @@ class Agent:
             except Exception as e:
                 print(f"Error while calling DeepSeek API: {e}")
                 raise RuntimeError("DeepSeek API call failed.") from e
+        else: # openai model
+            client = OpenAI(api_key=self.open_api_key)
+            try:
+                response = client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": self.last_prompt},
+                        {"role": "user", "content": query}
+                    ],
+                    max_tokens=1500,
+                    temperature=1.0
+                )
+                return response.choices[0].message.content, formatted_evidence
+            except Exception as e:
+                print(f"If you try to use deepseek, check your api_key. If you try to use open ai, Error while calling OpenAI API: {e}")
+                raise RuntimeError("If you try to use deepseek, check your api_key. If you try to use open ai, Error while calling OpenAI API") from e
+
 
         return "DeepSeek API key not provided. Returning prompt only."
 

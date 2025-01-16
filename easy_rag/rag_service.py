@@ -27,6 +27,7 @@ class RagService:
         self.retriever = Retriever(self.embedding)
         self.agent = Agent(
             model=response_model,
+            embedding_model=embedding_model,
             open_api_key=self.open_api_key,
             deepseek_api_key=self.deepseek_api_key,
             deepseek_base_url=self.deepseek_base_url,

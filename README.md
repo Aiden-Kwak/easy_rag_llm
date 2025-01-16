@@ -5,7 +5,7 @@
 
 ## 🇰🇷 소개
 - easy_rag_llm는 OpenAI 및 DeepSeek 모델을 지원하는 간단한 RAG(정보 검색 및 생성) 기반 서비스를 제공합니다. 간단하게 RAG LLM을 서비스에 통합시킬 수 있도록 만들어졌습니다.
-- (2025.01.16 기준/ v1.0.12) 학습가능한 자료 포맷은 PDF입니다.
+- (2025.01.16 기준/ v1.1.0) 학습가능한 자료 포맷은 PDF입니다.
 
 ## 🇺🇸 Introduction
 - easy_rag_llm is a lightweight RAG-based service that supports both OpenAI and DeepSeek models.
@@ -13,7 +13,7 @@ It is designed to seamlessly integrate RAG-based LLM functionalities into your s
 - As of 2025-01-15 (v1.0.0), the supported resource format for training is PDF.
 
 ## Usage
-#### Install
+#### Install (https://pypi.org/project/easy-rag-llm/)
 ```bash
 pip install easy_rag_llm
 ```
@@ -28,6 +28,12 @@ rs = RagService(
     open_api_key="your_openai_api_key_here",
     deepseek_api_key="your_deepseek_api_key_here",
     deepseek_base_url="https://api.deepseek.com",
+)
+
+rs2 = RagService( # this is example for openai chat model
+    embedding_model="text-embedding-3-small",
+    response_model="gpt-3.5-turbo",
+    open_api_key="your_openai_api_key_here",
 )
 
 # Learn from all files under ./rscFiles
@@ -49,9 +55,10 @@ print(response)
 
 ### release version.
 - 1.0.12 : Supported. However, the embedding model and chat model are fixed to OpenAI's text-embedding-3-small and deepseek-chat, respectively. Fixed at threadpool worker=10, which may cause errors in certain environments.
+- 1.1.0 : LTS version.
 
-### 고쳐야할 지점
-- api key 사용이 자유롭지 않음.
+### TODO
+- 입력포맷 다양화. pdf외 지원.
 
 ### Author Information
 - 곽병혁 (https://github.com/Aiden-Kwak)
