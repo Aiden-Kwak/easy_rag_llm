@@ -42,10 +42,12 @@ class RagService:
         if self.agent.model == "deepseek-chat" and not self.deepseek_api_key:
             raise ValueError("DEEPSEEK_API_KEY is required for deepseek-chat model")
     
+    """
     def rsc(self, resource_path, index_file="faiss_index.bin", metadata_file="metadata.json", force_update=False, max_workers=10):
         ###리소스 로드하고 임베딩 생성해야해. 
         ## 패스 아래의 모든 자료를 읽되, 메타데이터에서 이들 자료를 구분해야해
         ## max_workers 자율 조정을 위한 파라미터 추가. v1.0.13
+        ## resource_path+{"Index"} 아래로 파일들 저장해야해. 
         if not force_update:
             index, metadata = self.index_manager.load(index_file, metadata_file)
             if index and metadata:
@@ -54,7 +56,18 @@ class RagService:
         index, metadata = self.retriever.load_resources(resource_path, max_workers=max_workers)
         self.index_manager.save(index, metadata, index_file, metadata_file)
         return index, metadata
+    """
 
+    def rsc(self, resource_path, index_file="faiss_index.bin", metadata_file="metadata.json", force_update=False, max_workers=10, embed_worker=10):
+        ### Resource loading and embedding generation
+        if not force_update:
+            index, metadata = self.index_manager.load(resource_path, index_file, metadata_file)
+            if index and metadata:
+                return index, metadata
+
+        index, metadata = self.retriever.load_resources(resource_path, max_workers=max_workers, embed_worker=embed_worker)
+        self.index_manager.save(index, metadata, resource_path, index_file, metadata_file)
+        return index, metadata
     
     def generate_response(self, resource, query, evidence_num=3):
         response, top_evidence =  self.agent.generate_response(resource, query, evidence_num=evidence_num)

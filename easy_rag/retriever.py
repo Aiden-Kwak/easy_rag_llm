@@ -3,6 +3,7 @@ import numpy as np
 import faiss
 from tqdm import tqdm
 from pypdf import PdfReader
+import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .embedding import Embedding
 
@@ -11,7 +12,7 @@ class Retriever:
     def __init__(self, embedding):
         self.embedding = embedding
 
-    def load_resources(self, resource_path, chunk_size=512, chunk_overlap=50, max_workers=10):
+    def load_resources(self, resource_path, chunk_size=512, chunk_overlap=50, max_workers=10, embed_worker=10):
         if not os.path.isdir(resource_path):
             raise ValueError(f"Invalid resource path: {resource_path}")
 
@@ -35,6 +36,7 @@ class Retriever:
 
         chunks = self._split_text_into_chunks(nodes, chunk_size, chunk_overlap)
 
+        """
         embeddings = []
         metadata = []
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -48,6 +50,11 @@ class Retriever:
                     metadata.append(meta)
                 except Exception as e:
                     print(f"Error generating embedding: {e}")
+        """
+        #loop = asyncio.get_event_loop()
+        #embeddings, metadata = loop.run_until_complete(self._generate_embeddings_async(chunks))
+        embeddings, metadata = asyncio.run(self._generate_embeddings_async(chunks, SEMAPHORE_CNT=embed_worker))
+
 
         if embeddings:
             index = self._create_faiss_index(np.array(embeddings, dtype=np.float32))
@@ -83,6 +90,32 @@ class Retriever:
                 chunk_text = text[i:i + chunk_size]
                 chunks.append({"text": chunk_text, "page_number": page_number, "file_name": file_name})
         return chunks
+    
+
+    async def _generate_embeddings_async(self, chunks, SEMAPHORE_CNT=10):
+        embeddings = []
+        metadata = []
+
+        SEMAPHORE_CNT = SEMAPHORE_CNT
+
+        semaphore = asyncio.Semaphore(SEMAPHORE_CNT)  # 이거 권한 줘야하는지 보자.
+
+        async def process_chunk(chunk):
+            async with semaphore:
+                embedding, meta = await asyncio.to_thread(self._create_embedding_with_metadata, chunk)
+                return embedding, meta
+
+
+        tasks = [process_chunk(chunk) for chunk in chunks]
+        for future in tqdm(asyncio.as_completed(tasks), desc="Generating Embeddings", total=len(chunks)):
+            try:
+                embedding, meta = await future
+                embeddings.append(embedding)
+                metadata.append(meta)
+            except Exception as e:
+                print(f"Error generating embedding: {e}")
+
+        return embeddings, metadata
 
     def _create_embedding_with_metadata(self, chunk):
         embedding = self.embedding.create_embedding(chunk["text"])
