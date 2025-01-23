@@ -60,13 +60,18 @@ print(response)
 - 1.1.0 : LTS version.
 
 ### TODO
-index/아래에 생성된 임베딩이 있으면 그거 쓰도록 함.
-- Replace threadPool to asyncio (v1.2.* ~)
-- 입력포맷 다양화. pdf외 지원. (v1.4.* ~)
+- 청크를 나누는 방식에 대한 개선. 
+- 입력포맷 다양화. pdf외 지원. (v1.2.0 ~)
 
 
 ### What can you do with this?
 https://github.com/Aiden-Kwak/ClimateJudgeLLM
+
+
+### Release Message
+v1.1.5<br/>
+: Vector Searching method is changed to HNSW. <br/>
+: The speed of vector embedding has been significantly improved, reducing the time by 90%, making it 10 times faster than before! (10sec for 500 page PDF.)
 
 
 

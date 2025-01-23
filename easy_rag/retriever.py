@@ -117,7 +117,7 @@ class Retriever:
 
         return embeddings, metadata
     
-    async def _generate_embeddings_async(self, chunks, batch_size=10, concurrency=10):
+    async def _generate_embeddings_async(self, chunks, batch_size=20, concurrency=10):
         embeddings = []
         metadata = []
 
