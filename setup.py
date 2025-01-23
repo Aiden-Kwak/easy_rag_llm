@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="easy-rag-llm",
-    version="1.1.3",
+    version="1.0.23",
     author="Aiden-Kwak",
     author_email="duckracoon@gist.ac.kr",
     description="Easily implement RAG workflows with pre-built modules.",

@@ -58,14 +58,14 @@ class RagService:
         return index, metadata
     """
 
-    def rsc(self, resource_path, index_file="faiss_index.bin", metadata_file="metadata.json", force_update=False, max_workers=10, embed_worker=10):
+    def rsc(self, resource_path, index_file="faiss_index.bin", metadata_file="metadata.json", force_update=False, chunkers=10, embedders=10, ef_construction=200, ef_search=100, M=48):
         ### Resource loading and embedding generation
         if not force_update:
             index, metadata = self.index_manager.load(resource_path, index_file, metadata_file)
             if index and metadata:
                 return index, metadata
 
-        index, metadata = self.retriever.load_resources(resource_path, max_workers=max_workers, embed_worker=embed_worker)
+        index, metadata = self.retriever.load_resources(resource_path, chunkers=chunkers, embedders=embedders, ef_construction=ef_construction, ef_search=ef_search, M=M)
         self.index_manager.save(index, metadata, resource_path, index_file, metadata_file)
         return index, metadata
     

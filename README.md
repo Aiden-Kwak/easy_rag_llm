@@ -37,7 +37,8 @@ rs2 = RagService( # this is example for openai chat model
 )
 
 # Learn from all files under ./rscFiles
-resource = rs.rsc("./rscFiles", force_update=False, max_workers=5, embed_workers=10) # default workers are 10.
+# force_update=False, chunkers=10, embedders=10, ef_construction=200, ef_search=100, M=48 is default parameter. you can tune them.
+resource = rs.rsc("./rscFiles") # default workers are 10.
 
 query = "Explain what is taught in the third week's lecture."
 response, top_evidence = rs.generate_response(resource, query, evidence_num=5) # default evidence_num is 3.
@@ -59,11 +60,8 @@ print(response)
 - 1.1.0 : LTS version.
 
 ### TODO
-- 폴더기반 정리 지원. ./rscFiles 입력했으면 rscFilesIndex 생성하고
-그 아래로 인덱스 정리.
 index/아래에 생성된 임베딩이 있으면 그거 쓰도록 함.
 - Replace threadPool to asyncio (v1.2.* ~)
-- L2 기반 벡터검색외 HNSW 지원. (체감성능 비교) (v1.3.0~)
 - 입력포맷 다양화. pdf외 지원. (v1.4.* ~)
 
 
