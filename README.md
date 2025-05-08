@@ -57,7 +57,50 @@ print(response)
 
 ### release version.
 - 1.0.12 : Supported. However, the embedding model and chat model are fixed to OpenAI's text-embedding-3-small and deepseek-chat, respectively. Fixed at threadpool worker=10, which may cause errors in certain environments.
-- 1.1.0 : LTS version.
+- v1.1.5 : recommend.
+
+### UML
+<img src='docs/uml.png' width='800px'>
+
+### Execution flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Agent
+    participant OpenAI
+    participant DeepSeek
+    participant VectorDB
+
+    User->>Agent: Input Query
+    
+    rect rgb(200, 220, 255)
+        note over Agent: Embedding Generation Phase
+        Agent->>OpenAI: Request Embedding (real_query_embedding_fn)
+        OpenAI-->>Agent: Return Embedding Vector
+    end
+
+    rect rgb(220, 240, 220)
+        note over Agent: Document Retrieval Phase
+        Agent->>VectorDB: Similarity Search (index.search)
+        VectorDB-->>Agent: Return Relevant Document Indices
+        Agent->>Agent: Extract Documents from Metadata
+        Agent->>Agent: Format Evidence as JSON
+    end
+
+    rect rgb(255, 220, 220)
+        note over Agent: Response Generation Phase
+        alt Using OpenAI Model
+            Agent->>OpenAI: Request Chat Completion
+            OpenAI-->>Agent: Generate Response
+        else Using DeepSeek Model
+            Agent->>DeepSeek: Request Chat Completion
+            DeepSeek-->>Agent: Generate Response
+        end
+    end
+
+    Agent-->>User: Return Final Response and Evidence
+```
 
 ### TODO
 - 청크를 나누는 방식에 대한 개선. 
