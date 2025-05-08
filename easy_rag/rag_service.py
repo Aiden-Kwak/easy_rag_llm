@@ -13,6 +13,8 @@ class RagService:
             open_api_key=None,
             deepseek_api_key=None,
             deepseek_base_url="https://api.deepseek.com",
+            context_expansion=False,
+            expansion_window=1
     ):
         load_dotenv()
 
@@ -32,6 +34,9 @@ class RagService:
             deepseek_api_key=self.deepseek_api_key,
             deepseek_base_url=self.deepseek_base_url,
         )
+
+        # Set initial context expansion settings
+        self.set_context_expansion(context_expansion, expansion_window)
 
         # validation
         self.validate_configuration()
@@ -69,6 +74,30 @@ class RagService:
         self.index_manager.save(index, metadata, resource_path, index_file, metadata_file)
         return index, metadata
     
-    def generate_response(self, resource, query, evidence_num=3):
-        response, top_evidence =  self.agent.generate_response(resource, query, evidence_num=evidence_num)
+    def set_context_expansion(self, enable: bool, window_size: int = 1):
+        """컨텍스트 확장 설정을 변경합니다.
+        
+        Args:
+            enable (bool): 컨텍스트 확장 기능 활성화 여부
+            window_size (int): 앞뒤로 포함할 청크의 수
+        """
+        self.agent.set_context_expansion(enable, window_size)
+
+    def generate_response(self, resource, query, evidence_num=3, context_expansion=None, expansion_window=None):
+        """응답을 생성합니다.
+        
+        Args:
+            resource: 리소스 (인덱스와 메타데이터)
+            query (str): 사용자 질의
+            evidence_num (int): 검색할 증거 문서 수
+            context_expansion (bool, optional): 컨텍스트 확장 사용 여부. None이면 현재 설정 유지
+            expansion_window (int, optional): 확장할 컨텍스트 윈도우 크기. None이면 현재 설정 유지
+        
+        Returns:
+            tuple: (생성된 응답, 사용된 증거)
+        """
+        if context_expansion is not None:
+            self.set_context_expansion(context_expansion, expansion_window or 1)
+            
+        response, top_evidence = self.agent.generate_response(resource, query, evidence_num=evidence_num)
         return response, top_evidence
